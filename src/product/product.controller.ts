@@ -94,9 +94,23 @@ export class ProductController {
 
         const { products, total_count } = await this.productService.filterByName(q, category_id, page, limit);
 
+        // Extract blog IDs
+        const productIds = products.map(product => product._id);
+        // Fetch media documents
+        const medias = await this.productService.findMediasByProductIds(productIds);
+
+        // Map media documents to their corresponding blogs
+        const productData = products.map(product => {
+            const productMedia = medias.filter(media => media.product_id.toString() === product._id.toString());
+            return {
+                ...product.toObject(),
+                medias: productMedia.map(media => ({ _id: media._id, path: media.path }))
+            };
+        });
+
         return {
             data: {
-                products,
+                products: productData,
                 total_count,
                 limit,
                 page
