@@ -78,10 +78,10 @@ export class ProductController {
         @Query() query: any,
     ) {
         const q = query.q ? query.q.trim() : '';
-        const category_id = query.category? query.category : null;
+        const category_id = query.category ? query.category : null;
         const page = +query.page || 1;
         const limit = +query.limit || 20;
-        
+
         // If q is empty, return empty arrays
         if (!q) {
             return {
@@ -210,10 +210,8 @@ export class ProductController {
 
         return {
             data: {
-                product: {
-                    ...product.toJSON(),
-                    medias
-                }
+                ...product.toJSON(),
+                medias
             }
         };
     }
@@ -271,12 +269,14 @@ export class ProductController {
             throw new InternalServerErrorException("Product data not found.");
         }
 
-        if (Product.category_id.toString() !== body.category_id.toString()) {
-            const category = await this.categoryService.findOne(body.category_id.toString());
+        if (body.category_id) {
+            if (Product.category_id.toString() !== body.category_id.toString()) {
+                const category = await this.categoryService.findOne(body.category_id.toString());
 
-            if (!category) {
-                await this.fileService.deleteFiles(mediasFileName);
-                throw new InternalServerErrorException("Category Not found.");
+                if (!category) {
+                    await this.fileService.deleteFiles(mediasFileName);
+                    throw new InternalServerErrorException("Category Not found.");
+                }
             }
         }
 
@@ -316,7 +316,8 @@ export class ProductController {
             data: {
                 ...updatedProduct.toObject(),
                 medias: medias_result
-            }
+            },
+            message: "Product has been updated."
         };
     }
 
