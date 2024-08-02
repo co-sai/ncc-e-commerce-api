@@ -138,7 +138,7 @@ export class ProductService {
         }
 
         const products = await this.productModel.find(queryCondition)
-            .select("_id title")
+            .select("_id title price")
             .skip((page - 1) * limit)
             .limit(limit)
             .exec();
