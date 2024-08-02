@@ -161,7 +161,7 @@ export class CategoryController {
         await this.categoryService.findByIdAndDelete(id);
 
         return {
-            message: "Category and related sub-categories and blogs have been deleted successfully."
+            message: "Category and related products have been deleted successfully."
         };
     }
 }
