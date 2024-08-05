@@ -5,7 +5,7 @@ function toLower(val: string): string {
     return val.toLowerCase();
 }
 
-@Schema({ timestamps : true })
+@Schema({ timestamps: true })
 export class Variant extends Document {
     @Prop({ required: true, set: toLower })
     name: string;

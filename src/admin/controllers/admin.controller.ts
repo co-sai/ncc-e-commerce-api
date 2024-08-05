@@ -2,7 +2,21 @@ import * as crypto from 'crypto';
 import * as path from 'path';
 import { promisify } from 'util';
 import { diskStorage } from 'multer';
-import { Body, Controller, Get, InternalServerErrorException, Post, UseGuards, Request, HttpCode, UseInterceptors, UploadedFiles, Delete, Param, Patch } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Get,
+    InternalServerErrorException,
+    Post,
+    UseGuards,
+    Request,
+    HttpCode,
+    UseInterceptors,
+    UploadedFiles,
+    Delete,
+    Param,
+    Patch,
+} from '@nestjs/common';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
@@ -16,119 +30,135 @@ import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 
 import { RequestInterface } from 'src/interface/request.interface';
 import { CreateAdminDto } from '../dto/create-admin.dto';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+    ApiBearerAuth,
+    ApiBody,
+    ApiConsumes,
+    ApiOperation,
+    ApiResponse,
+    ApiTags,
+} from '@nestjs/swagger';
 
 const scrypt = promisify(_scrypt);
-const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
 
-@ApiTags("Admin API")
+@ApiTags('Admin API')
 @UseGuards(JwtAuthGuard)
-@Controller({ path: "admin", version: "1" })
+@Controller({ path: 'admin', version: '1' })
 export class AdminController {
     constructor(
         private readonly adminService: AdminService,
         private readonly authService: AuthService,
         private readonly mailService: MailService,
         private readonly fileService: FileService,
-        private readonly configService: ConfigService
-    ) { }
+        private readonly configService: ConfigService,
+    ) {}
 
-    @Get("profile")
+    @Get('profile')
     @HttpCode(200)
-    @ApiBearerAuth("access-token")
-    @ApiOperation({ summary: "Current logged-in admin profile" })
+    @ApiBearerAuth('access-token')
+    @ApiOperation({ summary: 'Current logged-in admin profile' })
     async adminProfile(@Request() req: RequestInterface) {
         const id = req.user._id;
         const admin = await this.adminService.findById(id);
-        const { password, reset_token, reset_token_expiration, ...result } = admin.toJSON();
+        const { password, reset_token, reset_token_expiration, ...result } =
+            admin.toJSON();
         return {
-            data: result
-        }
+            data: result,
+        };
     }
 
-    @Get("list")
+    @Get('list')
     @HttpCode(200)
-    @ApiBearerAuth("access-token")
-    @ApiOperation({ summary: "Admin list" })
+    @ApiBearerAuth('access-token')
+    @ApiOperation({ summary: 'Admin list' })
     async adminList(@Request() req: RequestInterface) {
-        const { role_id } = (await this.adminService.findById(req.user._id)).toJSON();
+        const { role_id } = (
+            await this.adminService.findById(req.user._id)
+        ).toJSON();
         if (!role_id) {
-            throw new InternalServerErrorException("Account not found.");
+            throw new InternalServerErrorException('Account not found.');
         }
-        if (role_id.name !== "SUPER_ADMIN") {
-            throw new InternalServerErrorException("You are not allowed to view admin list.");
+        if (role_id.name !== 'SUPER_ADMIN') {
+            throw new InternalServerErrorException(
+                'You are not allowed to view admin list.',
+            );
         }
 
         const admins = await this.adminService.adminList();
         return {
-            data: admins
-        }
+            data: admins,
+        };
     }
 
-    @Get("role")
+    @Get('role')
     @HttpCode(200)
-    @ApiBearerAuth("access-token")
-    @ApiOperation({ summary: "Role list" })
+    @ApiBearerAuth('access-token')
+    @ApiOperation({ summary: 'Role list' })
     async findAllRole() {
         const role = await this.adminService.findAllRole();
         return {
-            data: role
-        }
+            data: role,
+        };
     }
 
-    @Get("/:id")
+    @Get('/:id')
     @HttpCode(200)
-    @ApiBearerAuth("access-token")
-    @ApiOperation({ summary: "Admin detail" })
+    @ApiBearerAuth('access-token')
+    @ApiOperation({ summary: 'Admin detail' })
     async adminDetail(
         @Request() req: RequestInterface,
-        @Param("id") id: string
+        @Param('id') id: string,
     ) {
-        const { role_id } = (await this.adminService.findById(req.user._id)).toJSON();
+        const { role_id } = (
+            await this.adminService.findById(req.user._id)
+        ).toJSON();
         if (!role_id) {
-            throw new InternalServerErrorException("Account not found.");
+            throw new InternalServerErrorException('Account not found.');
         }
-        if (role_id.name !== "SUPER_ADMIN") {
-            throw new InternalServerErrorException("You are not allowed to view admin detail.");
+        if (role_id.name !== 'SUPER_ADMIN') {
+            throw new InternalServerErrorException(
+                'You are not allowed to view admin detail.',
+            );
         }
         const admin = await this.adminService.findById(id);
-        const { password, reset_token, reset_token_expiration, ...result } = admin.toJSON();
+        const { password, reset_token, reset_token_expiration, ...result } =
+            admin.toJSON();
         return {
-            data: result
-        }
+            data: result,
+        };
     }
 
     @Post('create')
     @HttpCode(201)
     @ApiBearerAuth('access-token')
-    @ApiOperation({ summary: "Create new Admin By Super Admin" })
-    @ApiResponse({ status: 201, description: "Success." })
+    @ApiOperation({ summary: 'Create new Admin By Super Admin' })
+    @ApiResponse({ status: 201, description: 'Success.' })
     @ApiConsumes('multipart/form-data')
     @ApiBody({
         description: 'Create Admin',
         schema: {
             type: 'object',
             properties: {
-                first_name: { type: 'string', example: "first name" },
-                last_name: { type: 'string', example: "last name" },
-                email: { type: 'string', example: "admin@gmail.com" },
-                country_code: { type: 'string', example: "+95"},
-                phone_number: { type: 'string', example: "9299999999" },
-                role_id: { type: 'string', example: "66836a97dc331c20cbbdc8f2" },
-                password: { type: 'string', example: "admin@123" },
-                photo: { type: 'string', format: 'binary' }
+                first_name: { type: 'string', example: 'first name' },
+                last_name: { type: 'string', example: 'last name' },
+                email: { type: 'string', example: 'admin@gmail.com' },
+                country_code: { type: 'string', example: '+95' },
+                phone_number: { type: 'string', example: '9299999999' },
+                role_id: {
+                    type: 'string',
+                    example: '66836a97dc331c20cbbdc8f2',
+                },
+                password: { type: 'string', example: 'admin@123' },
+                photo: { type: 'string', format: 'binary' },
             },
         },
     })
-    @UseInterceptors(FileFieldsInterceptor(
-        [
-            { name: 'photo', maxCount: 1 },
-        ]
-    ))
+    @UseInterceptors(FileFieldsInterceptor([{ name: 'photo', maxCount: 1 }]))
     async createAdminOrUserAccount(
         @Body() body: CreateAdminDto,
         @UploadedFiles() files: { photo?: Express.Multer.File },
-        @Request() req: RequestInterface
+        @Request() req: RequestInterface,
     ) {
         let filenames: string[] = [];
 
@@ -137,14 +167,20 @@ export class AdminController {
             // Extract filenames from the files object and store them in an array
             const uploadFolder = path.join(process.cwd(), 'uploads', 'admin');
             if (files.photo) {
-                filenames.push(path.join(uploadFolder, files.photo[0].filename));
+                filenames.push(
+                    path.join(uploadFolder, files.photo[0].filename),
+                );
             }
 
             /* Start - Check Current user role and permission */
-            const { role_id } = (await this.adminService.findById(req.user._id)).toJSON();
-            if (role_id.name !== "SUPER_ADMIN") {
+            const { role_id } = (
+                await this.adminService.findById(req.user._id)
+            ).toJSON();
+            if (role_id.name !== 'SUPER_ADMIN') {
                 await this.fileService.deleteFiles(filenames);
-                throw new InternalServerErrorException("You are not allowed to create new account.");
+                throw new InternalServerErrorException(
+                    'You are not allowed to create new account.',
+                );
             }
 
             // Now `filenames` array contains the filenames of both photos and avatars
@@ -152,13 +188,19 @@ export class AdminController {
 
             if (exAdmin) {
                 await this.fileService.deleteFiles(filenames);
-                throw new InternalServerErrorException("Account already exist with that mail. Try with another one.");
+                throw new InternalServerErrorException(
+                    'Account already exist with that mail. Try with another one.',
+                );
             }
 
             const admin = await this.adminService.signUp(body);
 
             if (files.photo) {
-                const newFilename = await this.fileService.generateFileName(`${files.photo[0].filename}-${uniqueSuffix}-photo`, files.photo[0], "uploads/admin");
+                const newFilename = await this.fileService.generateFileName(
+                    `${files.photo[0].filename}-${uniqueSuffix}-photo`,
+                    files.photo[0],
+                    'uploads/admin',
+                );
                 admin.photo = `uploads/admin/${newFilename}`;
             } else {
                 admin.avatar = `uploads/avatar/avatar.jpg`;
@@ -166,55 +208,83 @@ export class AdminController {
 
             await admin.save();
 
-            const { access_token } = await this.authService.generateToken(admin);
-            const { password, reset_token, reset_token_expiration, ...result } = admin.toJSON();
+            const { access_token } =
+                await this.authService.generateToken(admin);
+            const { password, reset_token, reset_token_expiration, ...result } =
+                admin.toJSON();
 
             /* Send Login Credential Mail to Admin / User */
-            await this.mailService.sendLoginCredentialMail(body.email, body.password, admin.email, "Login Credential", "Login Credential")
+            await this.mailService.sendLoginCredentialMail(
+                body.email,
+                body.password,
+                admin.email,
+                'Login Credential',
+                'Login Credential',
+            );
 
             return {
-                message: "Success.",
+                message: 'Success.',
                 data: {
                     result,
-                    access_token
-                }
-            }
+                    access_token,
+                },
+            };
         } catch (err) {
             throw err;
         }
     }
 
-    @Patch("/:id")
+    @Patch('/:id')
     @HttpCode(200)
-    @ApiBearerAuth("access-token")
-    @ApiOperation({ summary: "Update Admin By Super Admin / It-self" })
-    @ApiResponse({ status: 200, description: "Account has been updated." })
+    @ApiBearerAuth('access-token')
+    @ApiOperation({ summary: 'Update Admin By Super Admin / It-self' })
+    @ApiResponse({ status: 200, description: 'Account has been updated.' })
     @ApiConsumes('multipart/form-data')
     @ApiBody({
         description: 'Update Admin',
         schema: {
             type: 'object',
             properties: {
-                first_name: { type: 'string', nullable : true, example: "Updated First name" },
-                last_name: { type: 'string', nullable : true, example: "Updated Last name" },
-                email: { type: 'string', nullable : true, example: "Updated email" },
-                country_code: { type: 'string', nullable : true, example: "+95" },
-                phone_number: { type: 'string', nullable : true, example: "9888888888" },
-                role_id: { type: 'string', nullable : true, example: "66836a97dc331c20cbbdc8f2" },
-                photo: { type: 'string', format: 'binary', nullable : true }
-            }
+                first_name: {
+                    type: 'string',
+                    nullable: true,
+                    example: 'Updated First name',
+                },
+                last_name: {
+                    type: 'string',
+                    nullable: true,
+                    example: 'Updated Last name',
+                },
+                email: {
+                    type: 'string',
+                    nullable: true,
+                    example: 'Updated email',
+                },
+                country_code: {
+                    type: 'string',
+                    nullable: true,
+                    example: '+95',
+                },
+                phone_number: {
+                    type: 'string',
+                    nullable: true,
+                    example: '9888888888',
+                },
+                role_id: {
+                    type: 'string',
+                    nullable: true,
+                    example: '66836a97dc331c20cbbdc8f2',
+                },
+                photo: { type: 'string', format: 'binary', nullable: true },
+            },
         },
     })
-    @UseInterceptors(FileFieldsInterceptor(
-        [
-            { name: 'photo', maxCount: 1 },
-        ]
-    ))
+    @UseInterceptors(FileFieldsInterceptor([{ name: 'photo', maxCount: 1 }]))
     async adminUpdateProfile(
-        @Param("id") id: string,
+        @Param('id') id: string,
         @Body() body: Partial<CreateAdminDto>,
         @UploadedFiles() files: { photo?: Express.Multer.File },
-        @Request() req: RequestInterface
+        @Request() req: RequestInterface,
     ) {
         const { _id } = req.user;
 
@@ -226,10 +296,14 @@ export class AdminController {
 
         if (_id.toString() !== id.toString()) {
             // check permission
-            const { role_id } = (await this.adminService.findById(_id)).toJSON();
-            if (role_id.name !== "SUPER_ADMIN") {
+            const { role_id } = (
+                await this.adminService.findById(_id)
+            ).toJSON();
+            if (role_id.name !== 'SUPER_ADMIN') {
                 await this.fileService.deleteFiles(filenames);
-                throw new InternalServerErrorException("You don't have the permission to modify admin data.")
+                throw new InternalServerErrorException(
+                    "You don't have the permission to modify admin data.",
+                );
             }
         }
 
@@ -237,7 +311,7 @@ export class AdminController {
 
         if (!admin) {
             await this.fileService.deleteFiles(filenames);
-            throw new InternalServerErrorException("Account not found.");
+            throw new InternalServerErrorException('Account not found.');
         }
 
         // check updated mail is already exist or not.
@@ -247,7 +321,9 @@ export class AdminController {
                 const exAdmin = await this.adminService.findByEmail(body.email);
                 if (exAdmin) {
                     await this.fileService.deleteFiles(filenames);
-                    throw new InternalServerErrorException("Email address already in-used.");
+                    throw new InternalServerErrorException(
+                        'Email address already in-used.',
+                    );
                 }
             }
         }
@@ -258,10 +334,16 @@ export class AdminController {
         if (files.photo) {
             // check old file and delete it
             if (admin.photo) {
-                await this.fileService.deleteFiles([path.join(process.cwd(), admin.photo)]);
+                await this.fileService.deleteFiles([
+                    path.join(process.cwd(), admin.photo),
+                ]);
             }
 
-            const newFilename = await this.fileService.generateFileName(`${files.photo[0].filename}-${uniqueSuffix}-photo`, files.photo[0], "uploads/admin");
+            const newFilename = await this.fileService.generateFileName(
+                `${files.photo[0].filename}-${uniqueSuffix}-photo`,
+                files.photo[0],
+                'uploads/admin',
+            );
             admin.photo = `uploads/admin/${newFilename}`;
         } else {
             admin.photo = admin.photo;
@@ -282,39 +364,45 @@ export class AdminController {
                     phone_number: admin.phone_number,
                     photo: admin.photo,
                     avatar: admin.avatar,
-                    role_id: role
+                    role_id: role,
                 },
-                message: "Account has been updated."
-            }
-        }
+                message: 'Account has been updated.',
+            },
+        };
     }
 
-    @Delete("/:id")
+    @Delete('/:id')
     @HttpCode(200)
-    @ApiBearerAuth("access-token")
-    @ApiOperation({ summary: "Delete admin account by Super Admin / It-self" })
+    @ApiBearerAuth('access-token')
+    @ApiOperation({ summary: 'Delete admin account by Super Admin / It-self' })
     async deleteAccount(
-        @Param("id") id: string,
-        @Request() req: RequestInterface
+        @Param('id') id: string,
+        @Request() req: RequestInterface,
     ) {
         const _id = req.user._id;
 
         if (_id.toString() !== id.toString()) {
             // check permission
-            const { role_id } = (await this.adminService.findById(_id)).toJSON();
-            if (role_id.name !== "SUPER_ADMIN") {
-                throw new InternalServerErrorException("You don't have the permission.")
+            const { role_id } = (
+                await this.adminService.findById(_id)
+            ).toJSON();
+            if (role_id.name !== 'SUPER_ADMIN') {
+                throw new InternalServerErrorException(
+                    "You don't have the permission.",
+                );
             }
         }
         const account = await this.adminService.findById(id);
         if (!account) {
-            throw new InternalServerErrorException("Account not found.");
+            throw new InternalServerErrorException('Account not found.');
         }
 
         const uploadFolder = path.join(process.cwd(), 'uploads', 'admin');
         let filenames: string[] = [];
         if (account.photo) {
-            const photo_file_name = await this.fileService.getFilenameFromUrl(account.photo);
+            const photo_file_name = await this.fileService.getFilenameFromUrl(
+                account.photo,
+            );
             filenames.push(path.join(uploadFolder, photo_file_name));
         }
 
@@ -323,9 +411,7 @@ export class AdminController {
         await this.adminService.findByIdAndDelete(id);
 
         return {
-            message: "Account has been deleted."
-        }
-
+            message: 'Account has been deleted.',
+        };
     }
-
 }

@@ -7,15 +7,15 @@ import { CommonModule } from 'src/common/common.module';
 import { ProductModule } from 'src/product/product.module';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: Category.name, schema: CategorySchema },
-    ]),
-    CommonModule,
-    forwardRef(() => ProductModule),
-  ],
-  controllers: [CategoryController],
-  providers: [CategoryService],
-  exports: [CategoryService]
+    imports: [
+        MongooseModule.forFeature([
+            { name: Category.name, schema: CategorySchema },
+        ]),
+        CommonModule,
+        forwardRef(() => ProductModule),
+    ],
+    controllers: [CategoryController],
+    providers: [CategoryService],
+    exports: [CategoryService],
 })
-export class CategoryModule { }
+export class CategoryModule {}

@@ -10,19 +10,21 @@ export class FileService {
             const unlinkAsync = util.promisify(fs.unlink);
 
             // Iterate over the file paths and delete each file
-            await Promise.all(filePaths.map(async (filePath) => {
-                try {
-                    // Check if the file exists
-                    await fs.promises.access(filePath, fs.constants.F_OK);
+            await Promise.all(
+                filePaths.map(async (filePath) => {
+                    try {
+                        // Check if the file exists
+                        await fs.promises.access(filePath, fs.constants.F_OK);
 
-                    // If the file exists, delete it
-                    await unlinkAsync(filePath);
-                    // console.log(`File ${filePath} deleted successfully`);
-                } catch (error) {
-                    // If the file does not exist, log a message
-                    // console.warn(`File ${filePath} does not exist`);
-                }
-            }));
+                        // If the file exists, delete it
+                        await unlinkAsync(filePath);
+                        // console.log(`File ${filePath} deleted successfully`);
+                    } catch (error) {
+                        // If the file does not exist, log a message
+                        // console.warn(`File ${filePath} does not exist`);
+                    }
+                }),
+            );
 
             console.log('All files deleted successfully');
         } catch (error) {
@@ -41,7 +43,6 @@ export class FileService {
             fs.renameSync(oldPath, newPath);
 
             return newFilename;
-
         } catch (err) {
             throw err;
         }

@@ -7,8 +7,7 @@ function toUpper(val: string): string {
 
 @Schema({ timestamps: true })
 export class Role extends Document {
-
-    @Prop({ required: true, set : toUpper })
+    @Prop({ required: true, set: toUpper })
     name: string;
 }
 

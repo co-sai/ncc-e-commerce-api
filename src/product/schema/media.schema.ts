@@ -8,7 +8,11 @@ export class Media extends Document {
     @Prop({ required: true })
     path: string; // "uploads/blog_id/image_id.jpeg"
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true })
+    @Prop({
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        required: true,
+    })
     product_id: mongoose.Types.ObjectId;
 }
 

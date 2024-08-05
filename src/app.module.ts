@@ -1,4 +1,9 @@
-import { Module, ValidationPipe, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import {
+    Module,
+    ValidationPipe,
+    NestModule,
+    MiddlewareConsumer,
+} from '@nestjs/common';
 import { APP_PIPE, APP_FILTER } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -20,55 +25,52 @@ import { CategoryModule } from './category/category.module';
 import { ProductModule } from './product/product.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV}`
-    }),
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
-        const uri = configService.get<string>('MONGODB_URI');
-        return {
-          uri: uri,
-        };
-      },
-      inject: [ConfigService],
-    }),
-    WinstonModule.forRoot(winstonConfig),
-    // Serve the 'uploads' folder statically
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'uploads'), // Specify the path to your 'uploads' folder
-      serveRoot: '/uploads', // Base URL under which the files should be accessible from the frontend
-    }),
-    AdminModule,
-    AuthModule,
-    MailModule,
-    RoleSeedModule,
-    SuperAdminSeedingModule,
-    CategoryModule,
-    ProductModule,
-  ],
-  controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_PIPE,
-      useValue: new ValidationPipe({
-        whitelist: true
-      })
-    },
-    {
-      provide: APP_FILTER,
-      useClass: AllExceptionsFilter
-    }
-  ],
+    imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+            envFilePath: `.env.${process.env.NODE_ENV}`,
+        }),
+        MongooseModule.forRootAsync({
+            imports: [ConfigModule],
+            useFactory: async (configService: ConfigService) => {
+                const uri = configService.get<string>('MONGODB_URI');
+                return {
+                    uri: uri,
+                };
+            },
+            inject: [ConfigService],
+        }),
+        WinstonModule.forRoot(winstonConfig),
+        // Serve the 'uploads' folder statically
+        ServeStaticModule.forRoot({
+            rootPath: join(process.cwd(), 'uploads'), // Specify the path to your 'uploads' folder
+            serveRoot: '/uploads', // Base URL under which the files should be accessible from the frontend
+        }),
+        AdminModule,
+        AuthModule,
+        MailModule,
+        RoleSeedModule,
+        SuperAdminSeedingModule,
+        CategoryModule,
+        ProductModule,
+    ],
+    controllers: [AppController],
+    providers: [
+        AppService,
+        {
+            provide: APP_PIPE,
+            useValue: new ValidationPipe({
+                whitelist: true,
+            }),
+        },
+        {
+            provide: APP_FILTER,
+            useClass: AllExceptionsFilter,
+        },
+    ],
 })
-
 export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(LoggerMiddleware)
-      .forRoutes('*');
-  }
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(LoggerMiddleware).forRoutes('*');
+    }
 }

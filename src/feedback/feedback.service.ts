@@ -8,7 +8,7 @@ import { CreateFeedbackDto } from './dto/create-feedback.dto';
 export class FeedbackService {
     constructor(
         @InjectModel(Feedback.name) private feedbackModel: Model<Feedback>,
-    ) { }
+    ) {}
 
     async create(body: CreateFeedbackDto) {
         const feedback = new this.feedbackModel({ ...body });
@@ -16,7 +16,8 @@ export class FeedbackService {
     }
 
     async findAllFeedback(page: number, limit: number) {
-        const feedbacks = await this.feedbackModel.find()
+        const feedbacks = await this.feedbackModel
+            .find()
             .limit(limit)
             .skip((page - 1) * limit)
             .sort({ createdAt: -1 })
@@ -26,12 +27,13 @@ export class FeedbackService {
         return { feedbacks, total_count };
     }
 
-    async findByIdAndDelete(id : string){
+    async findByIdAndDelete(id: string) {
         return await this.feedbackModel.findByIdAndDelete(id);
     }
 
-    async findFeedbacksByBlogId(id: string, page: number, limit : number){
-        const feedbacks = await this.feedbackModel.find({ blog_id : id })
+    async findFeedbacksByBlogId(id: string, page: number, limit: number) {
+        const feedbacks = await this.feedbackModel
+            .find({ blog_id: id })
             .limit(limit)
             .skip((page - 1) * limit)
             .sort({ createdAt: -1 })

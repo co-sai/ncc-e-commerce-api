@@ -1,16 +1,26 @@
 import * as mongoose from 'mongoose';
-import { IsNotEmpty, IsString, IsOptional, ValidateNested, IsArray, IsMongoId, IsNumber, IsBoolean, IsInt  } from "class-validator";
+import {
+    IsNotEmpty,
+    IsString,
+    IsOptional,
+    ValidateNested,
+    IsArray,
+    IsMongoId,
+    IsNumber,
+    IsBoolean,
+    IsInt,
+} from 'class-validator';
 import { Prop } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateProductDto {
-    @ApiProperty({ example: 'Computer'})
+    @ApiProperty({ example: 'Computer' })
     @IsString()
     @IsOptional()
-    title : string;
+    title: string;
 
-    @ApiProperty({ example: 'Electronic computer...'})
+    @ApiProperty({ example: 'Electronic computer...' })
     @IsString()
     @IsOptional()
     content: string;
