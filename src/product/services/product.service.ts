@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Product } from './schema/product.schema';
-import { Media } from './schema/media.schema';
-import { CreateProductDto } from './dto/create-product.dto';
+import { Product } from '../schema/product.schema';
+import { Media } from '../schema/media.schema';
+import { CreateProductDto } from '../dto/create-product.dto';
 
 @Injectable()
 export class ProductService {
     constructor(
         @InjectModel(Product.name) private productModel: Model<Product>,
         @InjectModel(Media.name) private mediaModel: Model<Media>,
-    ) {}
+    ) { }
 
     async createProduct(body: CreateProductDto, admin_id: string) {
         const product = new this.productModel({
@@ -38,6 +38,10 @@ export class ProductService {
             .find({ product_id: product_id })
             .select('_id path')
             .exec();
+    }
+
+    async findOneMediaByProductId(product_id: any){
+        return await this.mediaModel.findOne({ product_id : product_id}).exec();
     }
 
     async findMediasByProductIds(productIds: any) {

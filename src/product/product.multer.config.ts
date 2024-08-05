@@ -5,9 +5,14 @@ const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB in bytes
 export const ProductMulterConfig = {
     storage: diskStorage({
         destination: (req, file, cb) => {
-            const uploadPath = './uploads/product/'; // Destination folder for admin
-            cb(null, uploadPath);
-        },
+            if (file.fieldname === 'medias') {
+                cb(null, './uploads/product/');
+            } else if (file.fieldname === 'variant_medias') {
+                cb(null, './uploads/product/variants/');
+            } else {
+                cb(null, './uploads/product/');
+            }
+        }
     }),
     fileFilter: (req, file, cb) => {
         // Accept image files and video files with size limit

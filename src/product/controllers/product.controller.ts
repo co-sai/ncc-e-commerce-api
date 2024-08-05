@@ -26,16 +26,16 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-import { ProductService } from './product.service';
+import { ProductService } from '../services/product.service';
 import { FileService } from 'src/common/file/file.service';
 import { CategoryService } from 'src/category/category.service';
 import { AdminService } from 'src/admin/admin.service';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateProductDto } from '../dto/create-product.dto';
 import { RequestInterface } from 'src/interface/request.interface';
 import { Public } from 'src/decorators/public.decorators';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { Product } from './schema/product.schema';
+import { UpdateProductDto } from '../dto/update-product.dto';
+import { Product } from '../schema/product.schema';
 
 @ApiTags('Product API')
 @Controller({ path: 'product', version: '1' })
@@ -46,7 +46,7 @@ export class ProductController {
         private readonly fileService: FileService,
         private readonly categoryService: CategoryService,
         private readonly adminService: AdminService,
-    ) {}
+    ) { }
 
     @Public()
     @Get()

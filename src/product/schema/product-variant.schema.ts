@@ -15,7 +15,7 @@ export class ProductVariant extends Document {
     price: number;
 
     @Prop({ default: null })
-    image: string;
+    media: string;
 
     @Prop({
         type: mongoose.Schema.Types.ObjectId,
