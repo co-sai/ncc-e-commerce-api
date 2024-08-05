@@ -24,7 +24,7 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { FileService } from 'src/common/file/file.service';
-import { ProductService } from 'src/product/product.service';
+import { ProductService } from 'src/product/services/product.service';
 import * as path from 'path';
 
 @ApiTags('Category API')

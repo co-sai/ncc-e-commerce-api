@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Product } from './schema/product.schema';
-import { Media } from './schema/media.schema';
-import { CreateProductDto } from './dto/create-product.dto';
+import { Product } from '../schema/product.schema';
+import { Media } from '../schema/media.schema';
+import { CreateProductDto } from '../dto/create-product.dto';
 
 @Injectable()
 export class ProductService {
     constructor(
         @InjectModel(Product.name) private productModel: Model<Product>,
         @InjectModel(Media.name) private mediaModel: Model<Media>,
-    ) {}
+    ) { }
 
     async createProduct(body: CreateProductDto, admin_id: string) {
         const product = new this.productModel({
@@ -38,6 +38,10 @@ export class ProductService {
             .find({ product_id: product_id })
             .select('_id path')
             .exec();
+    }
+
+    async findOneMediaByProductId(product_id: any) {
+        return await this.mediaModel.findOne({ product_id: product_id }).exec();
     }
 
     async findMediasByProductIds(productIds: any) {
@@ -80,7 +84,7 @@ export class ProductService {
                 this.productModel
                     .findOne()
                     .skip(skip)
-                    .select('title content main_media view rank')
+                    .select('title content main_media view rank price')
                     .exec(),
             );
 
@@ -92,12 +96,16 @@ export class ProductService {
                 sortOrder = { rank: 1 };
             } else if (q === 'latest' || q === 'new') {
                 sortOrder = { createdAt: -1 }; // sorting by latest products
+            } else if (q === 'price_high') {
+                sortOrder = { price: -1 }; // sorting by highest price
+            } else if (q === 'price_low') {
+                sortOrder = { price: 1 }; // sorting by lowest price
             }
 
             products = await this.productModel
                 .find()
                 .sort(sortOrder)
-                .select('title content main_media view rank')
+                .select('title content main_media view rank price')
                 .limit(limit)
                 .skip(skip)
                 .exec();

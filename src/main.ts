@@ -61,8 +61,7 @@ function createUploadDirectories() {
         './uploads/avatar',
         './uploads/admin',
         './uploads/product',
-        './uploads/product/related-image',
-        './uploads/product/variant-image',
+        './uploads/product/variants',
         './uploads/user',
         './uploads/screenshot',
     ];
