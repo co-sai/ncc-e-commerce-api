@@ -164,4 +164,74 @@ export class ProductVariantController {
             throw error;
         }
     }
+
+    @Post("/:id")
+    @ApiBearerAuth("access-token")
+    @ApiOperation({ summary: "Update product variants" })
+    @ApiResponse({ status: 200, description: "Product variant has been updated successfully." })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        description: 'Update product variant',
+        schema: {
+            type: 'object',
+            properties: {
+                variant_image: { type: 'string', format: 'binary', nullable: true },
+                value: { type: 'string', nullable: true, example: "1Tb" },
+                price: { type: 'string', nullable: true, example: "2800000" },
+            }
+        }
+    })
+    @UseInterceptors(FileFieldsInterceptor([{ name: 'variant_medias', maxCount: 5 }]))
+    async updateSingleVariant(
+        @Body() body: any,
+        @Param("id") id: string,
+        @UploadedFiles() files: {
+            variant_medias?: Array<Express.Multer.File>
+        }
+    ) {
+        const variant_id = id;
+        let variantImageFileNames: string[] = [];
+        try {
+            const variantImagePath = path.join(process.cwd(), 'uploads', 'product', 'variants');
+            if (files.variant_medias && files.variant_medias.length > 0) {
+                variantImageFileNames = files.variant_medias.map((file) => (path.join(variantImagePath, file.filename)));
+            }
+
+            const productVariant = await this.productVariantService.findProductVariantById(id);
+            if (!productVariant) {
+                await this.fileService.deleteFiles(variantImageFileNames);
+                throw new InternalServerErrorException("Product variant not found.");
+            }
+            const { variant_medias, ...newVariant } = body;
+
+            Object.assign(productVariant, newVariant);
+
+            if (files.variant_medias && files.variant_medias.length > 0) {
+                if(productVariant.media){
+                    await this.fileService.deleteFiles([path.join(process.cwd(), productVariant.media)]);
+                }
+               
+                const uniqueSuffix = Math.floor(
+                    100000 + Math.random() * 900000,
+                );
+                const newFilename = await this.fileService.generateFileName(
+                    `${id}-${uniqueSuffix}-${files.variant_medias[0].originalname}`,
+                    files.variant_medias[0],
+                    'uploads/product/variants',
+                );
+                productVariant.media = `uploads/product/${newFilename}`;
+            }
+
+            await productVariant.save();
+
+            return {
+                data: {
+                    productVariant,
+                    message: "Product variant has been updated successfully."
+                }
+            }
+        } catch (error) {
+            throw error;
+        }
+    }
 }

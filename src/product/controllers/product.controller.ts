@@ -538,6 +538,7 @@ export class ProductController {
     }
 
     // Delete Product -> Done - Need to remove old image from product
+    // Need to delete product variant and variant media
     @Delete('/:id')
     @HttpCode(200)
     @ApiBearerAuth('access-token')

@@ -37,5 +37,9 @@ export class ProductVariantService {
             .select("value price media")
         return result;
     }
+
+    async findProductVariantById(id: string) {
+        return await this.productVariantModel.findById(id);
+    }
     
 }
