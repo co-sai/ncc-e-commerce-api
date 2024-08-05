@@ -40,8 +40,8 @@ export class ProductService {
             .exec();
     }
 
-    async findOneMediaByProductId(product_id: any){
-        return await this.mediaModel.findOne({ product_id : product_id}).exec();
+    async findOneMediaByProductId(product_id: any) {
+        return await this.mediaModel.findOne({ product_id: product_id }).exec();
     }
 
     async findMediasByProductIds(productIds: any) {
@@ -84,7 +84,7 @@ export class ProductService {
                 this.productModel
                     .findOne()
                     .skip(skip)
-                    .select('title content main_media view rank')
+                    .select('title content main_media view rank price')
                     .exec(),
             );
 
@@ -96,12 +96,16 @@ export class ProductService {
                 sortOrder = { rank: 1 };
             } else if (q === 'latest' || q === 'new') {
                 sortOrder = { createdAt: -1 }; // sorting by latest products
+            } else if (q === 'price_high') {
+                sortOrder = { price: -1 }; // sorting by highest price
+            } else if (q === 'price_low') {
+                sortOrder = { price: 1 }; // sorting by lowest price
             }
 
             products = await this.productModel
                 .find()
                 .sort(sortOrder)
-                .select('title content main_media view rank')
+                .select('title content main_media view rank price')
                 .limit(limit)
                 .skip(skip)
                 .exec();
