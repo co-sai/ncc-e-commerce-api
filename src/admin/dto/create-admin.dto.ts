@@ -2,8 +2,17 @@ import * as mongoose from 'mongoose';
 import { Prop } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, MinLength, Matches, IsString, IsMongoId } from "class-validator";
-import { AdminRole } from "../schema/admin.schema";
+import {
+    IsEmail,
+    IsEnum,
+    IsNotEmpty,
+    IsOptional,
+    MinLength,
+    Matches,
+    IsString,
+    IsMongoId,
+} from 'class-validator';
+import { AdminRole } from '../schema/admin.schema';
 
 export class CreateAdminDto {
     @ApiProperty({ example: 'John' })
@@ -48,8 +57,14 @@ export class CreateAdminDto {
     @IsNotEmpty()
     @IsString()
     @MinLength(6, { message: 'Password must be at least 6 characters long' })
-    @Matches(/(?=.*[a-zA-Z])/, { message: 'Password must contain at least one letter' })
-    @Matches(/(?=.*[0-9])/, { message: 'Password must contain at least one number' })
-    @Matches(/(?=.*[!@#$%^&*])/, { message: 'Password must contain at least one special character' })
+    @Matches(/(?=.*[a-zA-Z])/, {
+        message: 'Password must contain at least one letter',
+    })
+    @Matches(/(?=.*[0-9])/, {
+        message: 'Password must contain at least one number',
+    })
+    @Matches(/(?=.*[!@#$%^&*])/, {
+        message: 'Password must contain at least one special character',
+    })
     password: string;
 }

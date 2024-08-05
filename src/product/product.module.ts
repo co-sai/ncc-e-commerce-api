@@ -11,18 +11,18 @@ import { CommonModule } from 'src/common/common.module';
 import { AdminModule } from 'src/admin/admin.module';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: Product.name, schema: ProductSchema },
-      { name: Media.name, schema: MediaSchema }
-    ]),
-    MulterModule.register(ProductMulterConfig),
-    CommonModule,
-    forwardRef(() => CategoryModule),
-    AdminModule,
-  ],
-  controllers: [ProductController],
-  providers: [ProductService],
-  exports: [ProductService]
+    imports: [
+        MongooseModule.forFeature([
+            { name: Product.name, schema: ProductSchema },
+            { name: Media.name, schema: MediaSchema },
+        ]),
+        MulterModule.register(ProductMulterConfig),
+        CommonModule,
+        forwardRef(() => CategoryModule),
+        AdminModule,
+    ],
+    controllers: [ProductController],
+    providers: [ProductService],
+    exports: [ProductService],
 })
-export class ProductModule { }
+export class ProductModule {}

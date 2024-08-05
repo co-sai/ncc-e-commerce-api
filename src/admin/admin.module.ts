@@ -13,18 +13,18 @@ import { multerConfig } from './admin.multer.config';
 import { AdminController } from './controllers/admin.controller';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: Admin.name, schema: AdminSchema },
-      { name: Role.name, schema: RoleSchema }
-    ]),
-    MulterModule.register(multerConfig),
-    AuthModule,
-    MailModule,
-    CommonModule
-  ],
-  controllers: [AdminAuthController, AdminController],
-  providers: [AdminService],
-  exports : [AdminService]
+    imports: [
+        MongooseModule.forFeature([
+            { name: Admin.name, schema: AdminSchema },
+            { name: Role.name, schema: RoleSchema },
+        ]),
+        MulterModule.register(multerConfig),
+        AuthModule,
+        MailModule,
+        CommonModule,
+    ],
+    controllers: [AdminAuthController, AdminController],
+    providers: [AdminService],
+    exports: [AdminService],
 })
-export class AdminModule { }
+export class AdminModule {}

@@ -5,13 +5,13 @@ import { FeedbackService } from './feedback.service';
 import { Feedback, FeedbackSchema } from './schema/feedback.schema';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: Feedback.name, schema: FeedbackSchema },
-    ])
-  ],
-  controllers: [FeedbackController],
-  providers: [FeedbackService],
-  exports: [FeedbackService]
+    imports: [
+        MongooseModule.forFeature([
+            { name: Feedback.name, schema: FeedbackSchema },
+        ]),
+    ],
+    controllers: [FeedbackController],
+    providers: [FeedbackService],
+    exports: [FeedbackService],
 })
 export class FeedbackModule {}

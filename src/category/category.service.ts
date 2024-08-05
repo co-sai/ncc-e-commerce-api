@@ -8,7 +8,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 export class CategoryService {
     constructor(
         @InjectModel(Category.name) private categoryModel: Model<Category>,
-    ) { }
+    ) {}
 
     async create(categoryDto: CreateCategoryDto): Promise<Category> {
         const createdCategory = new this.categoryModel(categoryDto);
@@ -23,8 +23,13 @@ export class CategoryService {
         return await this.categoryModel.find().exec();
     }
 
-    async update(id: string, categoryDto: Partial<CreateCategoryDto>): Promise<Category> {
-        return await this.categoryModel.findByIdAndUpdate(id, categoryDto, { new: true }).exec();
+    async update(
+        id: string,
+        categoryDto: Partial<CreateCategoryDto>,
+    ): Promise<Category> {
+        return await this.categoryModel
+            .findByIdAndUpdate(id, categoryDto, { new: true })
+            .exec();
     }
 
     async findByIdAndDelete(id: string) {

@@ -4,31 +4,33 @@ import * as util from 'util';
 
 @Injectable()
 export class FileUtilsService {
-  async deleteFiles(filePaths: string[]): Promise<void> {
-    try {
-      const unlinkAsync = util.promisify(fs.unlink);
-
-      // Iterate over the file paths and delete each file
-      await Promise.all(filePaths.map(async (filePath) => {
+    async deleteFiles(filePaths: string[]): Promise<void> {
         try {
-          // Check if the file exists
-          await fs.promises.access(filePath, fs.constants.F_OK);
+            const unlinkAsync = util.promisify(fs.unlink);
 
-          // If the file exists, delete it
-          await unlinkAsync(filePath);
-          // console.log(`File ${filePath} deleted successfully`);
+            // Iterate over the file paths and delete each file
+            await Promise.all(
+                filePaths.map(async (filePath) => {
+                    try {
+                        // Check if the file exists
+                        await fs.promises.access(filePath, fs.constants.F_OK);
+
+                        // If the file exists, delete it
+                        await unlinkAsync(filePath);
+                        // console.log(`File ${filePath} deleted successfully`);
+                    } catch (error) {
+                        // If the file does not exist, log a message
+                        // console.warn(`File ${filePath} does not exist`);
+                    }
+                }),
+            );
+
+            console.log('All files deleted successfully');
         } catch (error) {
-          // If the file does not exist, log a message
-          // console.warn(`File ${filePath} does not exist`);
+            console.error('Error deleting files:', error);
+            throw new Error('Failed to delete files');
         }
-      }));
-
-      console.log('All files deleted successfully');
-    } catch (error) {
-      console.error('Error deleting files:', error);
-      throw new Error('Failed to delete files');
     }
-  }
 }
 
 /*

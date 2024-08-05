@@ -20,16 +20,20 @@ export class Product extends Document {
     @Prop({ default: 0 })
     view: number;
 
-    @Prop({ required: true, default : 1 })
+    @Prop({ required: true, default: 1 })
     rank: number;
 
     @Prop({ default: false })
-    has_variant: boolean
-    
+    has_variant: boolean;
+
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Category' })
     category_id: mongoose.Types.ObjectId;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Admin', required: true })
+    @Prop({
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Admin',
+        required: true,
+    })
     admin_id: mongoose.Types.ObjectId;
 }
 

@@ -10,7 +10,11 @@ export class Category extends Document {
     @Prop({ required: true })
     description: string;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null })
+    @Prop({
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+        default: null,
+    })
     parent_category_id: mongoose.Types.ObjectId;
 }
 
