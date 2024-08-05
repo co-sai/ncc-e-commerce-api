@@ -11,7 +11,10 @@ import { CommonModule } from 'src/common/common.module';
 import { AdminModule } from 'src/admin/admin.module';
 import { ProductVariantController } from './controllers/product-variant.controller';
 import { ProductVariantService } from './services/product-variant.service';
-import { ProductVariant, ProductVariantSchema } from './schema/product-variant.schema';
+import {
+    ProductVariant,
+    ProductVariantSchema,
+} from './schema/product-variant.schema';
 import { Variant, VariantSchema } from './schema/variant.schema';
 
 @Module({
@@ -20,7 +23,7 @@ import { Variant, VariantSchema } from './schema/variant.schema';
             { name: Product.name, schema: ProductSchema },
             { name: Media.name, schema: MediaSchema },
             { name: ProductVariant.name, schema: ProductVariantSchema },
-            { name: Variant.name, schema: VariantSchema }
+            { name: Variant.name, schema: VariantSchema },
         ]),
         MulterModule.register(ProductMulterConfig),
         CommonModule,
@@ -31,4 +34,4 @@ import { Variant, VariantSchema } from './schema/variant.schema';
     providers: [ProductService, ProductVariantService],
     exports: [ProductService, ProductVariantService],
 })
-export class ProductModule { }
+export class ProductModule {}

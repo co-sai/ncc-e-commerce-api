@@ -49,7 +49,7 @@ export class ProductController {
         private readonly fileService: FileService,
         private readonly categoryService: CategoryService,
         private readonly adminService: AdminService,
-    ) { }
+    ) {}
 
     @Public()
     @Get()
@@ -333,13 +333,16 @@ export class ProductController {
         );
 
         // Find Variant and Product Variation
-        const variants = await this.productVariantService.findProductVariantByProductIdAndDoGroup(id);
+        const variants =
+            await this.productVariantService.findProductVariantByProductIdAndDoGroup(
+                id,
+            );
 
         return {
             data: {
                 ...product.toJSON(),
                 medias,
-                variants
+                variants,
             },
         };
     }
@@ -559,13 +562,15 @@ export class ProductController {
         const admin = await this.adminService.findById(_id);
 
         if (!admin) {
-            throw new NotFoundException("Admin not found.");
+            throw new NotFoundException('Admin not found.');
         }
-    
+
         const { role_id } = admin.toJSON();
-    
+
         if (role_id.name !== 'SUPER_ADMIN') {
-            throw new InternalServerErrorException("You don't have the permission.");
+            throw new InternalServerErrorException(
+                "You don't have the permission.",
+            );
         }
 
         const product = await this.productService.findById(id);
@@ -589,20 +594,23 @@ export class ProductController {
         }
 
         // Find product variant and delete variant medias
-        if (product.has_variant.toString() === "true") {
-            const productVariant = await this.productVariantService.findProductVariant(id);
+        if (product.has_variant.toString() === 'true') {
+            const productVariant =
+                await this.productVariantService.findProductVariant(id);
             if (productVariant) {
                 // delete file
                 const fileName: string[] = productVariant.map((product) => {
                     if (product.media) {
-                        return path.join(process.cwd(), product.media)
+                        return path.join(process.cwd(), product.media);
                     }
                     return;
                 });
                 await this.fileService.deleteFiles(fileName);
 
                 // delete productVariant
-                await this.productVariantService.deleteProductVariantManyByPId(id);
+                await this.productVariantService.deleteProductVariantManyByPId(
+                    id,
+                );
             }
         }
 

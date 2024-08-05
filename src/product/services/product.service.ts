@@ -10,7 +10,7 @@ export class ProductService {
     constructor(
         @InjectModel(Product.name) private productModel: Model<Product>,
         @InjectModel(Media.name) private mediaModel: Model<Media>,
-    ) { }
+    ) {}
 
     async createProduct(body: CreateProductDto, admin_id: string) {
         const product = new this.productModel({
@@ -29,7 +29,7 @@ export class ProductService {
         return medias.map((media) => ({ _id: media._id, path: media.path }));
     }
 
-    async findById(id: string): Promise<Product> {
+    async findById(id: any): Promise<Product> {
         return await this.productModel.findById(id).exec();
     }
 
