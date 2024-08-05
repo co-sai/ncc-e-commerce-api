@@ -36,6 +36,8 @@ import { RequestInterface } from 'src/interface/request.interface';
 import { Public } from 'src/decorators/public.decorators';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { Product } from '../schema/product.schema';
+import { ProductVariant } from '../schema/product-variant.schema';
+import { ProductVariantService } from '../services/product-variant.service';
 
 @ApiTags('Product API')
 @Controller({ path: 'product', version: '1' })
@@ -43,6 +45,7 @@ import { Product } from '../schema/product.schema';
 export class ProductController {
     constructor(
         private readonly productService: ProductService,
+        private readonly productVariantService: ProductVariantService,
         private readonly fileService: FileService,
         private readonly categoryService: CategoryService,
         private readonly adminService: AdminService,
@@ -329,10 +332,14 @@ export class ProductController {
             product._id,
         );
 
+        // Find Variant and Product Variation
+        const variants = await this.productVariantService.findProductVariantByProductIdAndDoGroup(id);
+
         return {
             data: {
                 ...product.toJSON(),
                 medias,
+                variants
             },
         };
     }
@@ -549,19 +556,25 @@ export class ProductController {
         @Request() req: RequestInterface,
     ) {
         const _id = req.user._id;
-        const { role_id } = (await this.adminService.findById(_id)).toJSON();
-        if (role_id.name !== 'SUPER_ADMIN') {
-            throw new InternalServerErrorException(
-                "You don't have the permission.",
-            );
+        const admin = await this.adminService.findById(_id);
+
+        if (!admin) {
+            throw new NotFoundException("Admin not found.");
         }
-        const blog = await this.productService.findById(id);
-        if (!blog) {
-            throw new InternalServerErrorException('Blog not found.');
+    
+        const { role_id } = admin.toJSON();
+    
+        if (role_id.name !== 'SUPER_ADMIN') {
+            throw new InternalServerErrorException("You don't have the permission.");
+        }
+
+        const product = await this.productService.findById(id);
+        if (!product) {
+            throw new InternalServerErrorException('Product not found.');
         }
 
         const medias = await this.productService.findMediasByProductId(
-            blog._id,
+            product._id,
         );
         if (medias.length > 0) {
             // Extract _id array
@@ -575,11 +588,29 @@ export class ProductController {
             await this.fileService.deleteFiles(fileName);
         }
 
+        // Find product variant and delete variant medias
+        if (product.has_variant.toString() === "true") {
+            const productVariant = await this.productVariantService.findProductVariant(id);
+            if (productVariant) {
+                // delete file
+                const fileName: string[] = productVariant.map((product) => {
+                    if (product.media) {
+                        return path.join(process.cwd(), product.media)
+                    }
+                    return;
+                });
+                await this.fileService.deleteFiles(fileName);
+
+                // delete productVariant
+                await this.productVariantService.deleteProductVariantManyByPId(id);
+            }
+        }
+
         // delete product
         await this.productService.findByIdAndDelete(id);
 
         return {
-            message: 'Blog has been deleted successfully.',
+            message: 'Product has been deleted successfully.',
         };
     }
 }

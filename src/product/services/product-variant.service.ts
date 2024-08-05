@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { Product } from '../schema/product.schema';
 import { Media } from '../schema/media.schema';
 import { ProductVariant } from '../schema/product-variant.schema';
@@ -41,5 +41,64 @@ export class ProductVariantService {
     async findProductVariantById(id: string) {
         return await this.productVariantModel.findById(id);
     }
-    
+
+    async deleteSingleVariant(id: string) {
+        await this.productVariantModel.findByIdAndDelete(id);
+        return;
+    }
+
+    async findProductVariantByProductIdAndDoGroup(product_id: string) {
+        const result = await this.productVariantModel.aggregate([
+            {
+                $match: {
+                    product_id: new mongoose.Types.ObjectId(product_id)
+                }
+            },
+            {
+                $lookup: {
+                    from: 'variants', // Replace with the actual name of your variant metadata collection
+                    localField: 'variant_id',
+                    foreignField: '_id',
+                    as: 'variant'
+                }
+            },
+            {
+                $unwind: '$variant'
+            },
+            {
+                $group: {
+                    _id: '$variant.name',
+                    variants: {
+                        $push: {
+                            _id: '$_id',
+                            value: '$value',
+                            price: '$price',
+                            image: '$media'
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    name: '$_id',
+                    variants: 1
+                }
+            }
+        ]);
+
+        // Format the result into the desired structure
+        const formattedResult = {};
+        result.forEach(item => {
+            formattedResult[item.name] = item.variants;
+        });
+
+        return formattedResult;
+    }
+
+    async deleteProductVariantManyByPId(id: string) {
+        await this.productVariantModel.deleteMany({ product_id: id });
+        return;
+    }
+
 }

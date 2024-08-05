@@ -207,10 +207,10 @@ export class ProductVariantController {
             Object.assign(productVariant, newVariant);
 
             if (files.variant_medias && files.variant_medias.length > 0) {
-                if(productVariant.media){
+                if (productVariant.media) {
                     await this.fileService.deleteFiles([path.join(process.cwd(), productVariant.media)]);
                 }
-               
+
                 const uniqueSuffix = Math.floor(
                     100000 + Math.random() * 900000,
                 );
@@ -232,6 +232,26 @@ export class ProductVariantController {
             }
         } catch (error) {
             throw error;
+        }
+    }
+
+    // Delete single variant
+    @Delete("/:id")
+    @ApiBearerAuth("access-token")
+    @ApiOperation({ summary: "Delete product variants" })
+    @ApiResponse({ status: 200, description: "Product variant has been deleted successfully." })
+    async deleteVariant(@Param("id") id: string) {
+        const productVariant = await this.productVariantService.findProductVariantById(id);
+        if (!productVariant) {
+            throw new InternalServerErrorException("Variant not found.");
+        }
+        if (productVariant.media) {
+            await this.fileService.deleteFiles([path.join(process.cwd(), productVariant.media)]);
+        }
+        await this.productVariantService.deleteSingleVariant(id);
+
+        return {
+            message: "Variant has been deleted successfully."
         }
     }
 }
