@@ -13,7 +13,7 @@ export class CartService {
 
     async findAllCartByCustomerId(customer_id: any) {
         const carts = await this.cartModel
-            .find({ customer_id: customer_id })
+            .findOne({ customer_id: customer_id })
             .populate({
                 path: 'cart_items',
                 populate: {

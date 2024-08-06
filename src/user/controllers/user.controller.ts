@@ -246,19 +246,4 @@ export class UserController {
             message: 'Account has been deleted.',
         };
     }
-
-    private async generateFileName(id: string, file: any) {
-        try {
-            // Renaming the file to include admin._id
-            const newFilename = `${id}${extname(file.originalname)}`;
-
-            const oldPath = `./uploads/user/${file.filename}`;
-            const newPath = `./uploads/user/${newFilename}`;
-            fs.renameSync(oldPath, newPath);
-
-            return newFilename;
-        } catch (err) {
-            throw err;
-        }
-    }
 }

@@ -19,6 +19,7 @@ import {
     Delete,
     Patch,
     Query,
+    HttpCode,
 } from '@nestjs/common';
 import { CustomerService } from '../customer.service';
 import { CreateWishList } from '../dto/create-wishlist.dto';
@@ -37,7 +38,8 @@ interface CustomRequest extends ExpressRequest {
 export class CustomerWishListController {
     constructor(private readonly customerService: CustomerService) {}
 
-    @Get('')
+    @Get()
+    @HttpCode(200)
     @ApiBearerAuth('access-token')
     @ApiOperation({ summary: 'Customer wishlist' })
     @ApiResponse({ status: 200, description: 'Customer wishlist' })
@@ -126,10 +128,11 @@ export class CustomerWishListController {
     }
 
     @Delete('/:id')
+    @HttpCode(200)
     @ApiBearerAuth('access-token')
     @ApiOperation({ summary: 'Remove product from wishlist' })
     @ApiResponse({
-        status: 201,
+        status: 200,
         description: 'Product has been removed from wishlist',
     })
     async removeFromWishList(

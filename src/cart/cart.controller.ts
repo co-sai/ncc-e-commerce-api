@@ -7,6 +7,7 @@ import {
     Request,
     InternalServerErrorException,
     Get,
+    HttpCode,
 } from '@nestjs/common';
 import {
     ApiBearerAuth,
@@ -40,6 +41,7 @@ export class CartController {
     ) {}
 
     @Get()
+    @HttpCode(200)
     @ApiBearerAuth('access-token')
     @ApiOperation({ summary: "Customer's cart list" })
     @ApiResponse({ status: 200, description: "Customer's cart list" })
@@ -53,15 +55,13 @@ export class CartController {
         const cart = await this.cartService.findAllCartByCustomerId(
             customer._id,
         );
-
         return {
-            data: {
-                cart,
-            },
+            data: cart
         };
     }
 
     @Post('add')
+    @HttpCode(201)
     @ApiBearerAuth('access-token')
     @ApiOperation({ summary: 'Add wishlist' })
     @ApiResponse({
