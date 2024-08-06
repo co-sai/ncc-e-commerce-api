@@ -12,7 +12,7 @@ export const ProductMulterConfig = {
             } else {
                 cb(null, './uploads/product/');
             }
-        }
+        },
     }),
     fileFilter: (req, file, cb) => {
         // Accept image files and video files with size limit

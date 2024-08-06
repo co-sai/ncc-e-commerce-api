@@ -10,12 +10,15 @@ export class ProductVariantService {
     constructor(
         @InjectModel(Product.name) private productModel: Model<Product>,
         @InjectModel(Media.name) private mediaModel: Model<Media>,
-        @InjectModel(ProductVariant.name) private productVariantModel: Model<ProductVariant>,
-        @InjectModel(Variant.name) private variantModel: Model<Variant>
-    ) { }
+        @InjectModel(ProductVariant.name)
+        private productVariantModel: Model<ProductVariant>,
+        @InjectModel(Variant.name) private variantModel: Model<Variant>,
+    ) {}
 
     async findVariantByName(name: string) {
-        const variant = await this.variantModel.findOne({ name: name.trim().toLowerCase() });
+        const variant = await this.variantModel.findOne({
+            name: name.trim().toLowerCase(),
+        });
         return variant;
     }
 
@@ -26,15 +29,21 @@ export class ProductVariantService {
     }
 
     async createProductVariant({ value, price, product_id, variant_id }) {
-        const productVariant = new this.productVariantModel({ value, price, product_id, variant_id });
+        const productVariant = new this.productVariantModel({
+            value,
+            price,
+            product_id,
+            variant_id,
+        });
         await productVariant.save();
         return productVariant;
     }
 
     async findProductVariant(product_id: string) {
-        const result = await this.productVariantModel.find({ product_id: product_id })
-            .populate("variant_id", "name")
-            .select("value price media")
+        const result = await this.productVariantModel
+            .find({ product_id: product_id })
+            .populate('variant_id', 'name')
+            .select('value price media');
         return result;
     }
 
@@ -51,19 +60,19 @@ export class ProductVariantService {
         const result = await this.productVariantModel.aggregate([
             {
                 $match: {
-                    product_id: new mongoose.Types.ObjectId(product_id)
-                }
+                    product_id: new mongoose.Types.ObjectId(product_id),
+                },
             },
             {
                 $lookup: {
                     from: 'variants', // Replace with the actual name of your variant metadata collection
                     localField: 'variant_id',
                     foreignField: '_id',
-                    as: 'variant'
-                }
+                    as: 'variant',
+                },
             },
             {
-                $unwind: '$variant'
+                $unwind: '$variant',
             },
             {
                 $group: {
@@ -73,23 +82,23 @@ export class ProductVariantService {
                             _id: '$_id',
                             value: '$value',
                             price: '$price',
-                            image: '$media'
-                        }
-                    }
-                }
+                            image: '$media',
+                        },
+                    },
+                },
             },
             {
                 $project: {
                     _id: 0,
                     name: '$_id',
-                    variants: 1
-                }
-            }
+                    variants: 1,
+                },
+            },
         ]);
 
         // Format the result into the desired structure
         const formattedResult = {};
-        result.forEach(item => {
+        result.forEach((item) => {
             formattedResult[item.name] = item.variants;
         });
 
@@ -100,5 +109,4 @@ export class ProductVariantService {
         await this.productVariantModel.deleteMany({ product_id: id });
         return;
     }
-
 }

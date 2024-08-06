@@ -23,6 +23,11 @@ import { LoggerMiddleware } from './utils/logger.middleware';
 import { AllExceptionsFilter } from './utils/all-exceptions.filter';
 import { CategoryModule } from './category/category.module';
 import { ProductModule } from './product/product.module';
+import { UserModule } from './user/user.module';
+import { CustomerModule } from './customer/customer.module';
+import { CartModule } from './cart/cart.module';
+import { AccountStatusSeedModule } from './seed/account_status/account-status.seed.module';
+import { CustomerLevelSeedModule } from './seed/customer_level/customer-level.seed.module';
 
 @Module({
     imports: [
@@ -53,6 +58,11 @@ import { ProductModule } from './product/product.module';
         SuperAdminSeedingModule,
         CategoryModule,
         ProductModule,
+        UserModule,
+        CustomerModule,
+        CartModule,
+        AccountStatusSeedModule,
+        CustomerLevelSeedModule,
     ],
     controllers: [AppController],
     providers: [
