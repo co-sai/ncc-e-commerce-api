@@ -24,6 +24,7 @@ import {
 import { CustomerService } from '../customer.service';
 import { CreateWishList } from '../dto/create-wishlist.dto';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { ProductService } from 'src/product/services/product.service';
 
 interface CustomRequest extends ExpressRequest {
     user: {
@@ -36,7 +37,10 @@ interface CustomRequest extends ExpressRequest {
 @UseGuards(JwtAuthGuard)
 @Controller('customer/wish-list')
 export class CustomerWishListController {
-    constructor(private readonly customerService: CustomerService) {}
+    constructor(
+        private readonly customerService: CustomerService,
+        private readonly productService: ProductService
+    ) {}
 
     @Get()
     @HttpCode(200)
@@ -73,10 +77,29 @@ export class CustomerWishListController {
                 page,
                 limit,
             );
+        
+        const productIds = wishList.map(item=> item.product_id._id);
+        // Find media for these product IDs
+        const medias = await this.productService.findMediasByProductIds(productIds);
+
+        // Map media documents to their corresponding blogs
+        const result = wishList.map((obj) => {
+            const productMedias = medias.filter(
+                (media) =>
+                    media.product_id.toString() === obj.product_id._id.toString(),
+            );
+            return {
+                ...obj.toObject(),
+                medias: productMedias.map((media) => ({
+                    _id: media._id,
+                    path: media.path,
+                })),
+            };
+        });
 
         return {
             data: {
-                wishList,
+                wish_list: result,
                 page,
                 limit,
                 total_count,

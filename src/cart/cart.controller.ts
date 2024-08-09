@@ -22,13 +22,7 @@ import { CartService } from './cart.service';
 import { CreateCartItemDto } from './dto/create-cart-item.dto';
 import { CustomerService } from 'src/customer/customer.service';
 import { ProductService } from 'src/product/services/product.service';
-
-interface CustomRequest extends ExpressRequest {
-    user: {
-        _id: string;
-        email: string;
-    };
-}
+import { RequestInterface } from 'src/interface/request.interface';
 
 @ApiTags('Cart API')
 @UseGuards(JwtAuthGuard)
@@ -38,25 +32,53 @@ export class CartController {
         private readonly cartService: CartService,
         private readonly customerService: CustomerService,
         private readonly productService: ProductService,
-    ) {}
+    ) { }
 
     @Get()
     @HttpCode(200)
     @ApiBearerAuth('access-token')
     @ApiOperation({ summary: "Customer's cart list" })
     @ApiResponse({ status: 200, description: "Customer's cart list" })
-    async cartList(@Request() req: CustomRequest) {
+    async cartList(@Request() req: RequestInterface) {
         const user_id = req.user._id;
         const customer =
             await this.customerService.findCustomerByUserId(user_id);
         if (!customer) {
             throw new InternalServerErrorException('Account not found.');
         }
-        const cart = await this.cartService.findAllCartByCustomerId(
-            customer._id,
-        );
+        const cart: any = await this.cartService.findAllCartByCustomerId(customer._id);
+
+
+        if (!cart) {
+            return { data: [] };
+        }
+
+        // Collect all product IDs from the cart items
+        const productIds = cart.cart_items.map(item => item.product_id._id);
+
+        // Find media for these product IDs
+        const medias = await this.productService.findMediasByProductIds(productIds);
+
+        // Group media by product_id and attach to the cart items
+        const updatedCartItems = cart.cart_items.map(item => {
+            const productMedias = medias.filter(
+                media => media.product_id.toString() === item.product_id._id.toString()
+            );
+
+            return {
+                ...item.toObject(),
+                media: productMedias.map(media => ({
+                    _id: media._id,
+                    path: media.path,
+                })),
+            };
+        });
+
         return {
-            data: cart
+            data: {
+                ...cart.toObject(),
+                cart_items: updatedCartItems,
+            }
         };
     }
 
@@ -83,7 +105,7 @@ export class CartController {
     })
     async addToCart(
         @Body() body: CreateCartItemDto,
-        @Request() req: CustomRequest,
+        @Request() req: RequestInterface,
     ) {
         const user_id = req.user._id;
         const customer =
@@ -171,4 +193,82 @@ export class CartController {
             },
         };
     }
+
+    // Remove Entire Item from Cart
+    @Post('remove')
+    @HttpCode(200)
+    @ApiBearerAuth('access-token')
+    @ApiOperation({ summary: 'Remove entire product from cart' })
+    @ApiResponse({
+        status: 200,
+        description: 'Product has been removed from cart',
+    })
+    @ApiBody({
+        type: CreateCartItemDto,
+        required: true,
+        examples: {
+            example1: {
+                summary: 'Example 1',
+                value: {
+                    product_id: '6684c64d4c2dd84e8a444528',
+                },
+            },
+        },
+    })
+    async removeCartItemFromCart(
+        @Body() body: { product_id : string },
+        @Request() req: RequestInterface,
+    ) {
+        const user_id = req.user._id;
+        const customer = await this.customerService.findCustomerByUserId(user_id);
+
+        if (!customer) {
+            throw new InternalServerErrorException('Account not found.');
+        }
+
+        const product = await this.productService.findById(body.product_id);
+        if (!product) {
+            throw new InternalServerErrorException('Product not found.');
+        }
+
+        let cart = await this.cartService.findCartByCustomerId(customer._id);
+
+        if (!cart) {
+            throw new InternalServerErrorException('Cart not found.');
+        }
+
+        const cartItem = await this.cartService.findCartItemByProductId(
+            product._id,
+            customer._id,
+        );
+
+        if (!cartItem) {
+            throw new InternalServerErrorException(
+                'Product not found in the cart.',
+            );
+        }
+
+        // Remove the cart item
+        await this.cartService.removeFromCartItem(cartItem._id);
+
+        // Remove cart item from cart's cart_items array
+        const cartItems = cart.cart_items.filter(
+            (item_id) => item_id.toString() !== cartItem._id.toString(),
+        );
+        cart.cart_items = cartItems;
+        await cart.save();
+
+        // Recalculate the total price
+        const result = await this.cartService.calculateCartTotalPrice(
+            customer._id,
+        );
+
+        return {
+            data: {
+                cart: result,
+            },
+            message: "Removed cart item from cart."
+        };
+    }
+
 }
