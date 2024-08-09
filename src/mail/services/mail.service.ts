@@ -73,7 +73,7 @@ export class MailService {
         subject: string,
         text: string,
     ) {
-        const verificationLink = `http://localhost:3000/auth/user/email-verification?token=${email_verify_token}`;
+        const verificationLink = `${this.configService.get<string>('BASE_URL')}/email/verify?token=${email_verify_token}`;
         const htmlTemplatePath = path.join(
             process.cwd(),
             'src',
