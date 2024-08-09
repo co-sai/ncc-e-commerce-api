@@ -13,6 +13,7 @@ import {
     ShippingAddressSchema,
 } from './schema/shipping-address.schema';
 import { WishList, WishListSchema } from './schema/wish-list.schema';
+import { ProductModule } from 'src/product/product.module';
 
 @Module({
     imports: [
@@ -22,6 +23,7 @@ import { WishList, WishListSchema } from './schema/wish-list.schema';
             { name: Shipping_Address.name, schema: ShippingAddressSchema },
             { name: WishList.name, schema: WishListSchema },
         ]),
+        ProductModule
     ],
     controllers: [CustomerShippingAddress, CustomerWishListController],
     providers: [CustomerService],

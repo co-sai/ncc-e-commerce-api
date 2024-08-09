@@ -127,13 +127,13 @@ export class CustomerService {
         page: number,
         limit: number,
     ) {
-        const result = await this.wishListModel
+        const result : any = await this.wishListModel
             .find({
                 customer_id: customer_id,
             })
             .populate({
                 path: 'product_id',
-                select: 'title description image price',
+                select: 'title description price',
             })
             .skip((page - 1) * limit)
             .limit(limit)

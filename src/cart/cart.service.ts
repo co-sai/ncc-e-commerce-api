@@ -18,7 +18,7 @@ export class CartService {
                 path: 'cart_items',
                 populate: {
                     path: 'product_id',
-                    select: 'title image',
+                    select: '_id title',  // Ensure both _id and title are selected
                     model: 'Product',
                 },
             })
